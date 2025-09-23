@@ -46,7 +46,7 @@ There are many other detailed features to work through, but this is one baseline
       6. Submit all answers at the end
       7. Show QR code to someone nearby so they can participate in same poll
 2. Python Back-end API JSON Storage Engine Object list
-    1. Creator - who created and owns the poll
+    1. DEPRECATED - NOT NEEDED -> Creator - who created and owns the poll
     2. Poll - poll name, description, number of times it's bee administered
     3. Poll Question - many questions per poll
     4. Poll Instance - a record of each time the poll was administered
@@ -55,20 +55,23 @@ There are many other detailed features to work through, but this is one baseline
 
 **JSON Storage Instance Relationships**
 
-* Creator creates many Polls
+* DEPRECATED - NOT NEEDED -> Creator creates many Polls
 * Polls contain many Poll Questions
 * Polls are released to participants as Poll Instances
 * Poll Instance Participants join a Poll Instance
 * Poll Instance Participants answer Poll Questions for this Poll which is stored in Participant Answers
 
 Another way to represent as relational tables and fields ([PK] and [FK] designates Primary Keys and Foreign Keys)
-* Table Name: CREATOR
+* DEPRECATED - NOT NEEDED -> Table Name: CREATOR
   * CreatorID: [PK] GUID
 * Table Name: POLL
   * PollID: [PK] GUID
   * CreatorID: [FK] GUID
   * PollName: STRING
   * PollCreationDate: DATETIME
+  * PollLockedForEditing: BOOL
+    * Added per the clarifications document
+    * Set to True when a user visits the Poll editor with the correct GUID. If page detects no activity after 5 minutes, Lock is removed and user must re-enter the GUID.
 * Table Name: POLL_QUESTION
   * PollQuestionID: [PK] GUID
   * PollID: [FK] GUID
