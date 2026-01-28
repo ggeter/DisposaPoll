@@ -1,8 +1,8 @@
-**SPOT POLL Application**
+**DisposaPoll Application**
 
-This application allows users to create anonymous polls for people to participate in.
+This application allows users to create anonymous polls for people to participate in. The polls are accessible only via magic links. No logins. If a poll is not viewed/used via any magic link in 30 days, the poll and its data disappears.
 
-Users who migh need to create polls:
+Users who might need to create polls:
 
 * Public speakers
 * Teachers
@@ -25,82 +25,31 @@ There are many other detailed features to work through, but this is one baseline
 
 1. HTML/JS/CSS front end
    1. Poll Creator interface
-      1. Create polls
-      2. Manage existing polls
-      3. Control the release of polls and questions
-      4. Control display of poll results
-      5. Close and Delete polls
-   2. Live Event Screen interface
-      1. Shows participation QR code
+      1. Login without a username or email or passoword. Just visit the site and click "Create New Poll" and the poll creation interface is started, with the magic link peristent in the URL bar (and also cpoy-able with a button that's always at the top of the screen). 
+      2. IF USER IS VISITNG PAGE WITH A MAGIC LINK
+         1. The link has one of three modes: Owner, ResultsViewer, PollTaker
+         2. "Owner" link allows user to edit poll (a poll with at least one response is uneditable), delete the poll at that magic link, and copy the two other magic links for distrubution (also available via Copy buttons at top of screen in Owner mode). When owner is done creating the poll, they simply post the magic link to accept responses. If the Owner wishes to submit the poll for another event, the Owner can "Make Copy of Poll" which copies the current poll definitions and redirects to a new magic link for the new poll.
+         3. "ResultsViewer" shows results of the poll in real time, all responses on one screen, using **MERMAID** for graphs
+         4. "PollTaker" presents the visitor with the poll, which the can **ONLY TAKE ONCE**
+   2. Live Event Screen interface - using Owner mode:
+      1. Shows participation QR codes (which resolves into the magic link for PollTaker or ResultsViewer)
       2. Shows poll statuses
          1. Name of poll
          2. Number of current participants
-         3. Status of questions - answers per question, for example
-         4. Final answers (either real-time or when Poll Creator releases)
-   3. End-User interface
-      1. Open poll
-      2. Wait for poll release
-      3. Wait for questions release
-      4. Answer questions
-      5. Allow edit of answers
-      6. Submit all answers at the end
-      7. Show QR code to someone nearby so they can participate in same poll
-2. Python Back-end API JSON Storage Engine Object list
-    1. DEPRECATED - NOT NEEDED -> Creator - who created and owns the poll
-    2. Poll - poll name, description, number of times it's bee administered
-    3. Poll Question - many questions per poll
-    4. Poll Instance - a record of each time the poll was administered
-    5. Poll Instance Participants - anonymous tracking information for participants
-    6. Participant Answer - each answer for current instance of this poll
+   3. End-User interface - using PollTaker mode:
+      1. Open poll with magic link
+      2. Answer questions
+      3. Submit all answers at the end
+      4. Show QR code to someone nearby so they can participate in same poll
+2. CLOUDFLARE BACK END - use Cloudflare tools appropriate for hosting page and storing information
+    1. Store poll definitions
+    2. Store magic link codes for the three modes of each poll
+    3. Store poll responses by respondant
+    4. Store poll responses in aggregate as responses are collected
 
 **JSON Storage Instance Relationships**
 
-* DEPRECATED - NOT NEEDED -> Creator creates many Polls
 * Polls contain many Poll Questions
-* Polls are released to participants as Poll Instances
 * Poll Instance Participants join a Poll Instance
 * Poll Instance Participants answer Poll Questions for this Poll which is stored in Participant Answers
 
-Another way to represent as relational tables and fields ([PK] and [FK] designates Primary Keys and Foreign Keys)
-* DEPRECATED - NOT NEEDED -> Table Name: CREATOR
-  * CreatorID: [PK] GUID
-* Table Name: POLL
-  * PollID: [PK] GUID
-  * CreatorID: [FK] GUID
-  * PollName: STRING
-  * PollCreationDate: DATETIME
-  * PollLockedForEditing: BOOL
-    * Added per the clarifications document
-    * Set to True when a user visits the Poll editor with the correct GUID. If page detects no activity after 5 minutes, Lock is removed and user must re-enter the GUID.
-* Table Name: POLL_QUESTION
-  * PollQuestionID: [PK] GUID
-  * PollID: [FK] GUID
-  * PollQuestionIndex: INTEGER
-  * PollQuestionText: STRING
-  * PollQuestionType: STRING
-    * Valid Values: "NUM", "YES_NO", "PICK_ONE", "PICK_MANY", "RANK"
-  * PollQuestionTypeChoices: STRING
-    * An array of strings to meet the requirements of the Type above, for example:
-      * NUM: an array of strings designating a numerical range, i.e., [1,20], "A number between 1 and 20, inclusive"
-      * YES_NO: requires no array
-      * PICK_ONE: ["Apple", "Orange", "Mango]
-      * PICK_MANY: same as Pick_One
-      * RANK: same as Pick_One
-* Table Name: POLL_INSTANCE
-  * PollInstanceID: [PK] GUID
-  * PollID: [FK] GUID
-  * PollInstanceDate: DATETIME
-  * PollInstanceDescription: STRING
-  * PollInstanceReleased: BOOL
-  * PollInstanceQuestionsReleased: STRING
-    * An array of GUIDs of questions participants are allowed to answer
-* Table Name: POLL_INSTANCE_PARTICIPANT
-  * PollInstanceParticipantID: [PK] GUID
-  * PollInstanceID: [FK] GUID
-  * PollInstanceParticipantDate: DATETIME
-* Table Name: POLL_INSTANCE_PARTICIPANT_ANSWER
-  * PollInstanceParticipantAnswerID: [PK] GUID
-  * PollInstanceParticipantID: [FK] GUID
-  * PollInstanceID: [FK] GUID
-  * PollQuestionID: [PK] GUID
-  * PollInstanceParticipantAnswer: STRING 
