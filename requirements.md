@@ -29,7 +29,7 @@ There are many other detailed features to work through, but this is one baseline
       2. IF USER IS VISITNG PAGE WITH A MAGIC LINK
          1. The link has one of three modes: Owner, ResultsViewer, PollTaker
          2. "Owner" link allows user to edit poll (a poll with at least one response is uneditable), delete the poll at that magic link, and copy the two other magic links for distrubution (also available via Copy buttons at top of screen in Owner mode). When owner is done creating the poll, they simply post the magic link to accept responses. If the Owner wishes to submit the poll for another event, the Owner can "Make Copy of Poll" which copies the current poll definitions and redirects to a new magic link for the new poll.
-         3. "ResultsViewer" shows results of the poll in real time, all responses on one screen, using **MERMAID** for graphs
+         3. "ResultsViewer" shows results of the poll in real time, all responses on one screen, using **SVGs** for graphs
          4. "PollTaker" presents the visitor with the poll, which the can **ONLY TAKE ONCE**
    2. Live Event Screen interface - using Owner mode:
       1. Shows participation QR codes (which resolves into the magic link for PollTaker or ResultsViewer)
@@ -53,3 +53,8 @@ There are many other detailed features to work through, but this is one baseline
 * Poll Instance Participants join a Poll Instance
 * Poll Instance Participants answer Poll Questions for this Poll which is stored in Participant Answers
 
+**TECHNOLOGIES TO USE**
+
+* Cloudflare for all backend services. You will need to assist user in setting up Cloudflare API/CLI. Choose the best solutions for this use case.
+* TailWind CSS for front end
+* SVG for diagrams (pie and bar charts) in results pages

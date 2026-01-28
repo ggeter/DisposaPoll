@@ -1,0 +1,43 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "disposapoll",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-01-27",
+	"compatibility_flags": [
+		"nodejs_compat_v2"
+	],
+	// Account ID from: wrangler whoami
+	"account_id": "557d2f82301f6e3103be663322ef1059",
+	
+	// Frontend is served by Cloudflare Pages
+	// Worker only handles API endpoints
+	
+	// Note: You need to create these resources first:
+	// 1. Run: wrangler d1 create disposapoll-db
+	// 2. Run: wrangler kv namespace create "MAGIC_LINKS"
+	// 3. Copy the IDs below from the command output
+	// D1 Database binding
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "disposapoll-db",
+			"database_id": "0d33a8bb-15e8-4596-8a4c-3cfb5b254574"
+		}
+	],
+	// KV Namespace for magic links
+	"kv_namespaces": [
+		{
+			"binding": "MAGIC_LINKS",
+			"id": "6557ee7ec4cc45818c97c23fafc81ea7"
+		}
+	],
+	// Environment variables
+	"vars": {
+		"ENVIRONMENT": "production"
+	},
+	// Observability
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1
+	}
+}
