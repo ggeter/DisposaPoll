@@ -9,7 +9,10 @@ CREATE TABLE polls (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_accessed DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_locked BOOLEAN DEFAULT 0,
-    total_participants INTEGER DEFAULT 0
+    total_participants INTEGER DEFAULT 0,
+    owner_code TEXT,
+    viewer_code TEXT,
+    taker_code TEXT
 );
 
 CREATE INDEX idx_polls_last_accessed ON polls(last_accessed);

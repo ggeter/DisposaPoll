@@ -57,7 +57,7 @@ async function loadPollByCode(code) {
 
         switch (data.mode) {
             case 'owner':
-                renderOwnerView(data.poll, code);
+                renderOwnerView(data.poll, code, data.magicLinks);
                 break;
             case 'taker':
                 renderTakerView(data.poll, code);
@@ -206,7 +206,7 @@ async function handleCreatePoll(e) {
 
 // ===== OWNER VIEW =====
 
-function renderOwnerView(poll, code) {
+function renderOwnerView(poll, code, magicLinks) {
     showView('owner');
 
     document.getElementById('owner-poll-title').textContent = poll.title;
@@ -217,15 +217,25 @@ function renderOwnerView(poll, code) {
     }
 
     // Store magic links for copying
-    currentMagicLinks = {
-        owner: window.location.origin + '/?code=' + code,
-        viewer: '',
-        taker: ''
-    };
+    if (magicLinks) {
+        currentMagicLinks = {
+            owner: window.location.origin + '/?code=' + magicLinks.owner,
+            viewer: window.location.origin + '/?code=' + magicLinks.viewer,
+            taker: window.location.origin + '/?code=' + magicLinks.taker
+        };
+    } else {
+        // Fallback: only owner code is available
+        currentMagicLinks = {
+            owner: window.location.origin + '/?code=' + code,
+            viewer: '',
+            taker: ''
+        };
+    }
 
-    // We need to get the viewer and taker codes - they're not returned in the poll
-    // For now, show the owner link
+    // Populate all magic link fields
     document.getElementById('owner-link').value = currentMagicLinks.owner;
+    document.getElementById('viewer-link').value = currentMagicLinks.viewer;
+    document.getElementById('taker-link').value = currentMagicLinks.taker;
 
     // Render questions
     const questionsList = document.getElementById('owner-questions-list');

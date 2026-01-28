@@ -4,7 +4,7 @@
 import { Env, CreatePollRequest, SubmitResponseRequest } from './types';
 import { corsHeaders, errorResponse, jsonResponse, parseRequestBody, generateSessionId } from './utils';
 import { validateMagicLink } from './services/magicLinks';
-import { createPoll, getPollById, updatePoll, deletePoll, copyPoll } from './services/polls';
+import { createPoll, getPollById, updatePoll, deletePoll, copyPoll, getPollMagicLinks } from './services/polls';
 import { submitResponse, hasParticipated } from './services/responses';
 import { getAggregatedResults } from './services/results';
 
@@ -139,10 +139,20 @@ async function handleGetPoll(env: Env, code: string): Promise<Response> {
     return errorResponse('Poll not found', 404);
   }
 
-  return jsonResponse({
+  // For owner mode, include magic links
+  const response: any = {
     poll,
     mode: linkData.mode,
-  });
+  };
+
+  if (linkData.mode === 'owner') {
+    const magicLinks = await getPollMagicLinks(env, linkData.pollId);
+    if (magicLinks) {
+      response.magicLinks = magicLinks;
+    }
+  }
+
+  return jsonResponse(response);
 }
 
 /**

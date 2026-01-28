@@ -15,12 +15,15 @@ export async function createPoll(
   const pollId = generateUUID();
   const now = new Date().toISOString();
 
-  // Insert poll record
+  // Generate magic links first
+  const magicLinks = await generateMagicLinks(env, pollId);
+
+  // Insert poll record with magic link codes
   await env.DB.prepare(
-    `INSERT INTO polls (id, title, description, created_at, last_accessed, is_locked, total_participants)
-     VALUES (?, ?, ?, ?, ?, 0, 0)`
+    `INSERT INTO polls (id, title, description, created_at, last_accessed, is_locked, total_participants, owner_code, viewer_code, taker_code)
+     VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, ?)`
   )
-    .bind(pollId, request.title, request.description || null, now, now)
+    .bind(pollId, request.title, request.description || null, now, now, magicLinks.owner, magicLinks.viewer, magicLinks.taker)
     .run();
 
   // Insert questions
@@ -37,9 +40,6 @@ export async function createPoll(
   });
 
   await Promise.all(questionPromises);
-
-  // Generate magic links
-  const magicLinks = await generateMagicLinks(env, pollId);
 
   // Fetch and return the created poll
   const poll = await getPollById(env, pollId);
@@ -201,4 +201,28 @@ export async function copyPoll(
   };
 
   return await createPoll(env, createRequest);
+}
+
+/**
+ * Get magic link codes for a poll from the database
+ */
+export async function getPollMagicLinks(
+  env: Env,
+  pollId: string
+): Promise<{ owner: string; viewer: string; taker: string } | null> {
+  const result = await env.DB.prepare(
+    'SELECT owner_code, viewer_code, taker_code FROM polls WHERE id = ?'
+  )
+    .bind(pollId)
+    .first();
+
+  if (!result) {
+    return null;
+  }
+
+  return {
+    owner: result.owner_code as string,
+    viewer: result.viewer_code as string,
+    taker: result.taker_code as string,
+  };
 }
