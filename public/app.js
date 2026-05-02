@@ -8,6 +8,10 @@ let refreshInterval = null;
 
 // Initialize app on page load
 document.addEventListener('DOMContentLoaded', () => {
+    // Always attach create form listeners so the form works when switching views
+    document.getElementById('add-question-btn').addEventListener('click', addQuestionToForm);
+    document.getElementById('create-poll-form').addEventListener('submit', handleCreatePoll);
+
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
 
@@ -16,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadPollByCode(code);
     } else {
         showView('create');
-        initializeCreateForm();
+        addQuestionToForm(); // Add initial blank question
     }
 });
 
@@ -76,13 +80,6 @@ async function loadPollByCode(code) {
 }
 
 // ===== CREATE POLL =====
-
-function initializeCreateForm() {
-    addQuestionToForm(); // Add initial question
-
-    document.getElementById('add-question-btn').addEventListener('click', addQuestionToForm);
-    document.getElementById('create-poll-form').addEventListener('submit', handleCreatePoll);
-}
 
 let questionCounter = 0;
 
@@ -248,30 +245,46 @@ function renderOwnerView(poll, code, magicLinks) {
     `).join('');
 
     // Event listeners
-    document.getElementById('copy-poll-btn').addEventListener('click', () => handleCopyPoll(code));
-    document.getElementById('delete-poll-btn').addEventListener('click', () => handleDeletePoll(code));
+    document.getElementById('copy-poll-btn').onclick = () => handleCopyPoll(poll);
+    document.getElementById('delete-poll-btn').onclick = () => handleDeletePoll(code);
 }
 
-async function handleCopyPoll(code) {
-    if (!confirm('Create a copy of this poll with new magic links?')) return;
+function handleCopyPoll(poll) {
+    // Switch to create view and pre-fill with existing poll data
+    showView('create');
 
-    showLoading();
-    try {
-        const response = await fetch(`${API_BASE}/polls/${code}/copy`, {
-            method: 'POST',
-        });
+    // Update heading and button text for edit context
+    document.querySelector('#create-view h2').textContent = 'Edit Copied Poll';
+    document.querySelector('#create-poll-form button[type="submit"]').textContent = 'Save Copied Poll';
 
-        if (!response.ok) throw new Error('Failed to copy poll');
+    // Pre-fill title and description
+    document.getElementById('poll-title').value = poll.title + ' (Copy)';
+    document.getElementById('poll-description').value = poll.description || '';
 
-        const data = await response.json();
-        hideLoading();
+    // Clear existing questions and repopulate from the poll
+    const container = document.getElementById('questions-container');
+    container.innerHTML = '';
+    questionCounter = 0;
 
-        // Redirect to new poll
-        window.location.href = `/?code=${data.magicLinks.owner}`;
-    } catch (error) {
-        hideLoading();
-        showError(error.message);
-    }
+    poll.questions.forEach(q => {
+        addQuestionToForm();
+        const qDiv = document.getElementById(`question-${questionCounter}`);
+        qDiv.querySelector('.question-text').value = q.questionText;
+        qDiv.querySelector('.question-type').value = q.questionType;
+        handleQuestionTypeChange(questionCounter);
+
+        if (q.questionType === 'single' || q.questionType === 'multiple') {
+            const optionsList = qDiv.querySelector('.options-list');
+            optionsList.innerHTML = '';
+            (q.options || []).forEach(opt => {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'option-input w-full px-3 py-2 border rounded text-sm';
+                input.value = opt;
+                optionsList.appendChild(input);
+            });
+        }
+    });
 }
 
 async function handleDeletePoll(code) {
